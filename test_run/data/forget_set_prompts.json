@@ -1,0 +1,102 @@
+[
+    {
+        "input": "Clause: The information may be disclosed to: (i) provide joint content and our services (eg, registration, coordination of membership accounts between the Viber corporate family, transactions, analytics and customer support); (ii) help detect and prevent potentially illegal acts, violations of our policies, fraud and/or data security breaches.\nQuestion: will my personal details be shared with third party  companies?\nAnswer:",
+        "target": "Relevant"
+    },
+    {
+        "input": "Clause: When you order any good or service through the Game, including any virtual currency or virtual good, our payment processing service provider will collect your name, phone number, e-mail address, mailing address, billing address, and complete credit card information that enables them to receive your payment.\nQuestion: does it collect payment information\nAnswer:",
+        "target": "Relevant"
+    },
+    {
+        "input": "Clause: In certain Games we will create and assign to your device an identifier that is similar to an account number.\nQuestion: does this app use data on my phone not within the app?\nAnswer:",
+        "target": "Relevant"
+    },
+    {
+        "input": "Clause: 23andMe Research may study a specific group or population, identify potential areas or targets for therapeutics development, conduct or support the development of drugs, diagnostics or devices to diagnose, predict or treat medical or other health conditions, work with public, private and/or non-profit entities on genetic research initiatives, or otherwise create, commercialize, and apply this new knowledge to improve health care.\nQuestion: do you use my data to do medical research\nAnswer:",
+        "target": "Relevant"
+    },
+    {
+        "input": "Clause: In addition, you may also permit Keep to access other content and data on your device  for example, your contact list and photo storage.\nQuestion: is any information shared with third parties?\nAnswer:",
+        "target": "Relevant"
+    },
+    {
+        "input": "Clause: We may receive certain information about you which is stored on social media sites if users of those sites give us access to their profiles and you are one of their friends or connections, depending upon your settings on those sites.\nQuestion: when do you delete stored data?\nAnswer:",
+        "target": "Relevant"
+    },
+    {
+        "input": "Clause: Once we have received your information, we have procedures and security features in place to try to prevent unauthorized access.\nQuestion: this app owner theft any personal details in my mobile (like photos, videos), possibilities are there?\nAnswer:",
+        "target": "Relevant"
+    },
+    {
+        "input": "Clause: Upon deactivation of your account, we will minimize the personal data we keep about you only to such data which we are required to keep to comply with laws, or other legal reasons.\nQuestion: can i submit a request to have my data deleted?\nAnswer:",
+        "target": "Relevant"
+    },
+    {
+        "input": "Clause: For more information about our marketing practices, please review our Cookie Policy.\nQuestion: will you sell my information?\nAnswer:",
+        "target": "Relevant"
+    },
+    {
+        "input": "Clause: However, their use ofPersonal Informationobtained through Groupon is governed by their privacy policies and is not subject to our control.\nQuestion: who will have access to my information?                                                            \nAnswer:",
+        "target": "Relevant"
+    },
+    {
+        "input": "Clause: You may be able to take part in certain activities through our Services that give you the opportunity to communicate or share information not just with PeopleFun, but also with other users of our Services.\nQuestion: what data does it collect\nAnswer:",
+        "target": "Relevant"
+    },
+    {
+        "input": "Clause: We will process any requests in line with any local laws and our policies and procedures.\nQuestion: how do i remove it?\nAnswer:",
+        "target": "Relevant"
+    },
+    {
+        "input": "Clause: Account deletion If you no longer wish to participate in our Services, or no longer wish to have your Personal Information be processed, you may delete your 23andMe account and Personal Information within your Account Settings.\nQuestion: will you destroy my dna sample when you are finished?\nAnswer:",
+        "target": "Relevant"
+    },
+    {
+        "input": "Clause: If you are a minor, you can use the service only in conjunction with your parents or guardians.\nQuestion: will my fitness coach share my information with others?\nAnswer:",
+        "target": "Relevant"
+    },
+    {
+        "input": "Clause: We may use your information to prevent, detect, and investigate fraud, security breaches, potentially prohibited or illegal activities, protect our trademarks and enforce ourTerms of Use.\nQuestion: if i send a message that is considered dirty, will the controllers of the app see it?\nAnswer:",
+        "target": "Relevant"
+    },
+    {
+        "input": "Clause: For more information on the appropriate safeguards in place, please contact us at the details below.\nQuestion: does viber have any affiliation with the advertisement industry?\nAnswer:",
+        "target": "Relevant"
+    },
+    {
+        "input": "Clause: Please read the Privacy Policies of those platforms, as your activity published on those platforms will no longer be governed by this Privacy Policy.\nQuestion: will my information be shared with other companies for marketing?\nAnswer:",
+        "target": "Relevant"
+    },
+    {
+        "input": "Clause: We think that you benefit from a more personalized experience when we know more about you and what you like.\nQuestion: what kind of permissions do i have to grant it?              \nAnswer:",
+        "target": "Relevant"
+    },
+    {
+        "input": "Clause: Information collected may be used, among other things, to deliver advertising targeted to your interests and to better understand the usage and visits to the Site and the other websites tracked by these third parties.\nQuestion: does it sell my data to anyone?                                                           \nAnswer:",
+        "target": "Relevant"
+    },
+    {
+        "input": "Clause: If you are a minor, you can use the service only in conjunction with your parents or guardians.\nQuestion: do you share my location with other people\nAnswer:",
+        "target": "Relevant"
+    },
+    {
+        "input": "Clause: (c) Activity Information:While using the Viber Services, we will collect, and other users can see, your connection status, whether you have received and seen messages sent to you, if you are currently on another call, and information related to the calls and messages you have sent and received such as length of the call, who called who, who messaged who, and at what time; if you do not want people to know that youre online or that youve seen messages, you can change these options in your settings.\nQuestion: who will be able to see my information and/or the messages that i send?\nAnswer:",
+        "target": "Relevant"
+    },
+    {
+        "input": "Clause: If for some reason, the message, wasnt delivered to its destination within up to 2 weeks, it will be deleted from our servers.\nQuestion: do you record our phone calls?\nAnswer:",
+        "target": "Relevant"
+    },
+    {
+        "input": "Clause: Enhance other information we have about you directly or fromOther Sourcesto help us better understand you and determine your interests, and to\nQuestion: is my search and purchase history shared with advertisers?  \nAnswer:",
+        "target": "Relevant"
+    },
+    {
+        "input": "Clause: Affiliatemeans an entity owned, directly or indirectly, by Groupon, Inc. or that is controlled by or under common control with Groupon, Inc., and also includes joint ventures entered into by Groupon, Inc. and/or its Affiliates.\nQuestion: does it sell my data to anyone?                                                           \nAnswer:",
+        "target": "Relevant"
+    },
+    {
+        "input": "Clause: Send you reminders, technical notices, updates, security alerts, support and administrative messages, service bulletins, marketing messages, and requested information, including on behalf ofBusiness Partners;\nQuestion: what kind of security protocol does groupon use to protect data and privacy of its users? \nAnswer:",
+        "target": "Relevant"
+    }
+]
