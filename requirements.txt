@@ -1,0 +1,11 @@
+torch
+transformers
+"datasets<4.0.0"
+accelerate
+peft
+bitsandbytes
+tqdm
+scikit-learn
+matplotlib
+pandas
+numpy
