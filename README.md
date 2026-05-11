@@ -2,10 +2,10 @@
 Does unlearned targeted names from a model's training data negatively affect the model's performance on legal reasoning tasks?
 
 ## Table of Contents
-[Project Description](#description)
-[Getting Started](#getting-started)
-[AI Use Statement](#ai-use-statement)
-[Authors](#authors)
+[Project Description](#description)\
+[Getting Started](#getting-started)\
+[AI Use Statement](#ai-use-statement)\
+[Authors](#authors)\
 [Licensing Information](#license)
 
 ## Description
