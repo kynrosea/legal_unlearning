@@ -44,6 +44,3 @@ This project used ChatGPT during the development process. It was used for genera
 
 ## License
 This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Acknowledgements
-TODO
