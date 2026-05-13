@@ -209,6 +209,7 @@ KNOWN_BINARY_TASKS = {
     "learned_hands_divorce",
 }
 
+# ensuring all labels match
 def canonical_label(x):
     s = str(x).strip()
     low = s.lower().strip().strip(".")
@@ -218,9 +219,9 @@ def canonical_label(x):
         return "No"
     return s
 
-
+# build model input from all non-label fields
 def build_input_from_example(ex):
-    """Assemble model input from all non-label fields, preserving keys."""
+    
     parts = []
     for k, v in ex.items():
         if k in LABEL_KEYS:
@@ -235,9 +236,10 @@ def get_gold(ex):
             return canonical_label(ex[k])
     return ""
 
-
+# read unique labels to legal bench tasks so we can match them during task evaluation
+# will use known binary labels if labels are not easily identified
 def derive_label_set(train_examples, task_name=None, test_examples=None):
-    """Read unique labels from train+sampled eval; fallback to binary labels for known LegalBench binary tasks."""
+    
     labels = set()
     for ex in list(train_examples) + list(test_examples or []):
         g = get_gold(ex)
@@ -249,7 +251,7 @@ def derive_label_set(train_examples, task_name=None, test_examples=None):
         return ["No", "Yes"]
     return labels
 
-
+# building prompt to input into model for legal bench evaluation tasks
 def build_prompt(tokenizer, train_examples, test_input, num_shots=3):
     # Make the few-shot examples label-canonical so labels match the scoring space.
     shots = train_examples[:num_shots]
@@ -303,7 +305,7 @@ def label_logprob(model, tokenizer, prompt: str, label: str, max_len: int = LEGA
         best = max(best, score)
     return best
 
-
+# evaluating single legal bench task performance
 def evaluate_task(model, tokenizer, task_name, max_samples=60, num_shots=3):
     try:
         ds = load_dataset(LEGALBENCH, task_name)
@@ -332,11 +334,11 @@ def evaluate_task(model, tokenizer, task_name, max_samples=60, num_shots=3):
 
     if not y_true:
         return None, "no scorable examples"
+    # using balanced accuracy to task performance
     bal_acc = balanced_accuracy_score(y_true, y_pred)
-    # Return extra diagnostics in print-only form for label coverage.
     return float(bal_acc), None
 
-
+# evaluating subset of all legal bench tasks
 def run_legalbench_eval(model, tokenizer, tasks, max_samples=60, label=""):
     print(f"\n{'='*68}\n  LegalBench — {label}  (balanced accuracy)\n{'='*68}")
     results = {}
@@ -350,10 +352,12 @@ def run_legalbench_eval(model, tokenizer, tasks, max_samples=60, label=""):
         else:
             print(f"  {task:<35} SKIP ({err})")
     if results:
+        # calculating the mean of the balanced accuracies of each legal bench task evaluation
         results["__mean__"] = float(np.mean(list(results.values())))
         print(f"\n  Mean ({len(results)-1} tasks): {results['__mean__']:.3f}")
     return results
 
+# computing the difference between the drop in name recall and the drop in legal bench performance
 def compute_selectivity_gap(forget_before, forget_after, legalbench_before, legalbench_after):
     forget_delta = forget_before['name_completion_full'] - forget_after['name_completion_full']
     lb_drop = legalbench_after['__mean__'] - legalbench_before['__mean__']

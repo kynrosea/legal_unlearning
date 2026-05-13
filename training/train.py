@@ -9,9 +9,9 @@ import csv
 
 
 class ForgetSpanDataset(Dataset):
-    """Each sample is (input_ids, attention_mask, target_mask).
-    builds input_ids manually so target tokens are unambiguously the name tokens.
-    No reliance on tokenizer padding side. Handles long prefixes by keeping tail."""
+
+    # each sample is (input_ids, attention_mask, target_mask)
+    # build the input_ids manually so target tokens are the name tokens
     def __init__(self, pairs, tokenizer, max_len):
         self.examples = []
         pad_id = tokenizer.pad_token_id
@@ -41,9 +41,9 @@ class ForgetSpanDataset(Dataset):
 
 
 class RetainDataset(Dataset):
-    """explicitly use right padding for retain batches too, regardless of
-    tokenizer.padding_side (which is set to 'left' for generate())."""
+
     def __init__(self, texts, tokenizer, max_len):
+        # use right padding for retain batches
         prev = tokenizer.padding_side
         tokenizer.padding_side = "right"
         try:
@@ -55,6 +55,7 @@ class RetainDataset(Dataset):
     def __getitem__(self, i):
         return {k: v[i] for k, v in self.enc.items()}
 
+# calculating the log probability of only the target name
 def masked_logprob_sum(model, input_ids, attention_mask, target_mask):
     with torch.set_grad_enabled(model.training):
         logits = model(input_ids=input_ids, attention_mask=attention_mask).logits
@@ -65,7 +66,7 @@ def masked_logprob_sum(model, input_ids, attention_mask, target_mask):
     token_lp = logprobs.gather(-1, shift_labels.unsqueeze(-1)).squeeze(-1)
     return (token_lp * shift_mask).sum(dim=-1)
 
-
+# calculating npo loss
 def npo_span_loss(model, ref_model, batch, beta):
     ids  = batch["input_ids"].to(model.device)
     mask = batch["attention_mask"].to(model.device)
@@ -74,20 +75,24 @@ def npo_span_loss(model, ref_model, batch, beta):
     with torch.no_grad():
         lp_ref = masked_logprob_sum(ref_model, ids, mask, tgt)
     log_ratio = lp_theta - lp_ref
+    # npo loss function
     loss = -(2.0 / beta) * F.logsigmoid(-beta * log_ratio).mean()
     return loss, log_ratio.mean().item()
 
-
+# KL compares model output with the ref model's output
+# done on next-token predictions here
 def retain_kl_loss(model, ref_model, batch):
-    """KL(model || reference target: reference distribution), computed on next-token
-    distributions only. v3.4 uses shifted masks to avoid scoring pad/current-token positions."""
+
     ids  = batch["input_ids"].to(model.device)
     mask = batch["attention_mask"].to(model.device)
+
+    # grabbing logits from reference and current model given retain set input ids
     with torch.set_grad_enabled(model.training):
         logits_m = model(input_ids=ids, attention_mask=mask).logits
     with torch.no_grad():
         logits_r = ref_model(input_ids=ids, attention_mask=mask).logits
 
+    # using shifted masks to avoid scoring pad or current token positions
     if RETAIN_KL_SHIFTED:
         logits_m = logits_m[:, :-1, :]
         logits_r = logits_r[:, :-1, :]
@@ -99,12 +104,15 @@ def retain_kl_loss(model, ref_model, batch):
     p_r   = F.softmax(logits_r, dim=-1)
     kl = (p_r * (torch.log(p_r + 1e-12) - log_m)).sum(dim=-1)
     kl = (kl * tok_mask).sum() / tok_mask.sum().clamp_min(1)
+
     return kl
 
-
+# running the npo training here
 def run_npo_with_retain(model, ref_model, tokenizer, train_pairs, retain_chunks,
                          steps, lr, batch_size, max_seq_len, beta, lambda_retain,
                          trace_csv_path=None):
+    
+    # preparing the forget and retain sets here for model input
     forget_ds = ForgetSpanDataset(train_pairs, tokenizer, max_seq_len)
     retain_ds = RetainDataset(retain_chunks, tokenizer, max_seq_len)
     forget_dl = DataLoader(forget_ds, batch_size=batch_size, shuffle=True)
@@ -113,6 +121,8 @@ def run_npo_with_retain(model, ref_model, tokenizer, train_pairs, retain_chunks,
     optimizer = AdamW(filter(lambda p: p.requires_grad, model.parameters()),
                       lr=lr, weight_decay=0.0)
     f_iter, r_iter = iter(forget_dl), iter(retain_dl)
+
+    # need these to see the changes in the model after every five steps
     loss_hist, ratio_hist, retain_hist, forget_hist = [], [], [], []
     model.train()
     print(f"NPO+retain: steps={steps} β={beta} λ_retain={lambda_retain} lr={lr}")
@@ -131,6 +141,7 @@ def run_npo_with_retain(model, ref_model, tokenizer, train_pairs, retain_chunks,
         ret_loss = retain_kl_loss(model, ref_model, rb)
         loss = forget_loss + lambda_retain * ret_loss
 
+        # computing gradients and updating parameter weights
         optimizer.zero_grad()
         loss.backward()
         torch.nn.utils.clip_grad_norm_(
@@ -152,17 +163,10 @@ def run_npo_with_retain(model, ref_model, tokenizer, train_pairs, retain_chunks,
             print(f"  step {step:3d}  total={loss.item():8.4f}  forget={forget_loss.item():8.4f}"
                   f"  retain_kl={ret_loss.item():7.4f}  log_ratio={log_ratio:8.2f}")
 
+        # stop training loop if model utility starts significantly degrading compared to ref model
         if EARLY_STOP_ENABLED and step >= EARLY_STOP_MIN_STEPS:
             if ret_loss.item() > EARLY_STOP_RETAIN_KL and log_ratio <= EARLY_STOP_LOG_RATIO_TARGET:
                 print(f"Early stop at step {step}: retain_kl={ret_loss.item():.4f}, log_ratio={log_ratio:.2f}")
                 break
 
-    # v3 PATCH: write training trace CSV
-    if trace_csv_path:
-        with open(trace_csv_path, "w", newline="") as f:
-            w = csv.DictWriter(f, fieldnames=["step","total_loss","forget_loss","retain_kl","log_ratio"])
-            w.writeheader()
-            for r in trace_rows:
-                w.writerow(r)
-        print(f"Wrote training trace: {trace_csv_path}")
     return loss_hist, ratio_hist, retain_hist, forget_hist
