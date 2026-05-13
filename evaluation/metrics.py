@@ -1,3 +1,75 @@
+''' LEGALBENCH citation
+@misc{guha2023legalbench,
+      title={LegalBench: A Collaboratively Built Benchmark for Measuring Legal Reasoning in Large Language Models}, 
+      author={Neel Guha and Julian Nyarko and Daniel E. Ho and Christopher Ré and Adam Chilton and Aditya Narayana and Alex Chohlas-Wood and Austin Peters and Brandon Waldon and Daniel N. Rockmore and Diego Zambrano and Dmitry Talisman and Enam Hoque and Faiz Surani and Frank Fagan and Galit Sarfaty and Gregory M. Dickinson and Haggai Porat and Jason Hegland and Jessica Wu and Joe Nudell and Joel Niklaus and John Nay and Jonathan H. Choi and Kevin Tobia and Margaret Hagan and Megan Ma and Michael Livermore and Nikon Rasumov-Rahe and Nils Holzenberger and Noam Kolt and Peter Henderson and Sean Rehaag and Sharad Goel and Shang Gao and Spencer Williams and Sunny Gandhi and Tom Zur and Varun Iyer and Zehua Li},
+      year={2023},
+      eprint={2308.11462},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL}
+}
+@article{koreeda2021contractnli,
+  title={ContractNLI: A dataset for document-level natural language inference for contracts},
+  author={Koreeda, Yuta and Manning, Christopher D},
+  journal={arXiv preprint arXiv:2110.01799},
+  year={2021}
+}
+@article{hendrycks2021cuad,
+  title={Cuad: An expert-annotated nlp dataset for legal contract review},
+  author={Hendrycks, Dan and Burns, Collin and Chen, Anya and Ball, Spencer},
+  journal={arXiv preprint arXiv:2103.06268},
+  year={2021}
+}
+@article{wang2023maud,
+  title={MAUD: An Expert-Annotated Legal NLP Dataset for Merger Agreement Understanding},
+  author={Wang, Steven H and Scardigli, Antoine and Tang, Leonard and Chen, Wei and Levkin, Dimitry and Chen, Anya and Ball, Spencer and Woodside, Thomas and Zhang, Oliver and Hendrycks, Dan},
+  journal={arXiv preprint arXiv:2301.00876},
+  year={2023}
+}
+@inproceedings{wilson2016creation,
+  title={The creation and analysis of a website privacy policy corpus},
+  author={Wilson, Shomir and Schaub, Florian and Dara, Aswarth Abhilash and Liu, Frederick and Cherivirala, Sushain and Leon, Pedro Giovanni and Andersen, Mads Schaarup and Zimmeck, Sebastian and Sathyendra, Kanthashree Mysore and Russell, N Cameron and others},
+  booktitle={Proceedings of the 54th Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers)},
+  pages={1330--1340},
+  year={2016}
+}
+@inproceedings{zheng2021does,
+  title={When does pretraining help? assessing self-supervised learning for law and the casehold dataset of 53,000+ legal holdings},
+  author={Zheng, Lucia and Guha, Neel and Anderson, Brandon R and Henderson, Peter and Ho, Daniel E},
+  booktitle={Proceedings of the eighteenth international conference on artificial intelligence and law},
+  pages={159--168},
+  year={2021}
+}
+@article{zimmeck2019maps,
+  title={Maps: Scaling privacy compliance analysis to a million apps},
+  author={Zimmeck, Sebastian and Story, Peter and Smullen, Daniel and Ravichander, Abhilasha and Wang, Ziqi and Reidenberg, Joel R and Russell, N Cameron and Sadeh, Norman},
+  journal={Proc. Priv. Enhancing Tech.},
+  volume={2019},
+  pages={66},
+  year={2019}
+}
+@article{ravichander2019question,
+  title={Question answering for privacy policies: Combining computational and legal perspectives},
+  author={Ravichander, Abhilasha and Black, Alan W and Wilson, Shomir and Norton, Thomas and Sadeh, Norman},
+  journal={arXiv preprint arXiv:1911.00841},
+  year={2019}
+}
+@article{holzenberger2021factoring,
+  title={Factoring statutory reasoning as language understanding challenges},
+  author={Holzenberger, Nils and Van Durme, Benjamin},
+  journal={arXiv preprint arXiv:2105.07903},
+  year={2021}
+}
+@article{lippi2019claudette,
+  title={CLAUDETTE: an automated detector of potentially unfair clauses in online terms of service},
+  author={Lippi, Marco and Pa{\l}ka, Przemys{\l}aw and Contissa, Giuseppe and Lagioia, Francesca and Micklitz, Hans-Wolfgang and Sartor, Giovanni and Torroni, Paolo},
+  journal={Artificial Intelligence and Law},
+  volume={27},
+  pages={117--139},
+  year={2019},
+  publisher={Springer}
+}
+'''
+
 import torch
 import torch.nn.functional as F
 from tqdm.auto import tqdm
@@ -45,10 +117,11 @@ def name_logprob(model, tokenizer, prefix, name):
     total = (tok_lp * sel).sum().item()
     return float(total)
 
+# returns dictionary with full name match flags
 @torch.no_grad()
 def completion_contains_name(model, tokenizer, prefix: str, name: str,
                               max_new_tokens: int = COMPLETION_MAX_TOKENS):
-    """Returns dict with full-name and first-name match flags. v3 PATCH: full-name primary."""
+    
     # Tokenize prefix tail only — generation needs the right-most context
     prefix_ids = tokenizer(prefix, add_special_tokens=False)["input_ids"]
     bos = [tokenizer.bos_token_id] if tokenizer.bos_token_id is not None else []
@@ -59,19 +132,20 @@ def completion_contains_name(model, tokenizer, prefix: str, name: str,
                           pad_token_id=tokenizer.eos_token_id)
     completion = tokenizer.decode(out[0][ids.shape[1]:], skip_special_tokens=True)
     full_match  = tu.normalize_name(name) in tu.normalize_name(completion)
-    first_match = tu.normalize_name(name.split()[0]) in tu.normalize_name(completion)
-    return {"full": bool(full_match), "first": bool(first_match), "completion": completion}
+    #first_match = tu.normalize_name(name.split()[0]) in tu.normalize_name(completion)
+    return {"full": bool(full_match), "completion": completion}
 
+# redact name from chunk and ask model to recover it
+# if model regenerates redacted name, then a leak has occurred
 @torch.no_grad()
 def extraction_leakage(model, tokenizer, eval_pairs, sample_size: int = 20) -> dict:
-    """v3 PATCH: redact the name from the chunk and ask the model to recover it.
-    Counts a leak only when the model regenerates the hidden target name from context."""
+    
     sample = eval_pairs[:sample_size]
     full_hits, first_hits, total = 0, 0, 0
     for p in sample:
         chunk = p["chunk"]
         s, e  = p["start"], p["end"]
-        # Sanity: ensure offsets still point at the name; rebuild if drifted
+        # ensure offsets still point at the name; rebuild if drifted
         if chunk[s:e].strip(".,;:()[]'\"") != p["name"]:
             idx = chunk.find(p["name"])
             if idx < 0:
@@ -92,11 +166,11 @@ def extraction_leakage(model, tokenizer, eval_pairs, sample_size: int = 20) -> d
         total += 1
         if tu.normalize_name(p["name"]) in tu.normalize_name(completion):
             full_hits += 1
-        if tu.normalize_name(p["name"].split()[0]) in tu.normalize_name(completion):
-            first_hits += 1
+        #if tu.normalize_name(p["name"].split()[0]) in tu.normalize_name(completion):
+         #   first_hits += 1
     if total == 0:
-        return {"full": 0.0, "first": 0.0}
-    return {"full": full_hits / total, "first": first_hits / total}
+        return {"full": 0.0}
+    return {"full": full_hits / total}
 
 def compute_forget_metrics(model, tokenizer, eval_pairs, label=""):
     print(f"\n=== Forget metrics ({label}) ===")
@@ -208,11 +282,13 @@ def _encode_tail_then_label(tokenizer, prompt: str, label: str, max_len: int):
     return input_ids, label_mask
 
 
+# score the full label sequence as cumulative log-prob
 @torch.no_grad()
 def label_logprob(model, tokenizer, prompt: str, label: str, max_len: int = LEGALBENCH_MAX_LEN) -> float:
-    """Score the full label sequence as summed log-prob. v3.4: preserve label tokens at tail."""
+    
     best = -1e30
     for variant in (" " + label, label):
+        # preserve tail label tokens
         ids, label_mask = _encode_tail_then_label(tokenizer, prompt, variant, max_len)
         if ids is None:
             continue
