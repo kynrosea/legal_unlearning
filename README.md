@@ -36,7 +36,7 @@ This project used ChatGPT during the development process. It was used for genera
 
 ## Authors
 - Kynnedy Armstrong (kynrosea)
-- Ben Noyes (bnoyes)
+- Ben Noyes
 
 ## Version History
 - 0.1
