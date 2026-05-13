@@ -1,20 +1,14 @@
 # file prints and saves results of the model run and evaluation
+from evaluation import metrics as m
 import matplotlib.pyplot as plt
 import numpy as np
 from config import *
 import json
 
-def compute_selectivity_gap(forget_before, forget_after, legalbench_before, legalbench_after):
-    forget_delta = forget_before['name_completion_full'] - forget_after['name_completion_full']
-    lb_drop = legalbench_before['__mean__'] - legalbench_after['__mean__']
-
-    selectivity_gap = forget_delta - lb_drop
-
-    return forget_delta, lb_drop, selectivity_gap
-
+# outputting all results for easy user viewing
 def print_results(forget_before, forget_after, lb_before, lb_after):
 
-    forget_delta, lb_drop, selectivity_gap = compute_selectivity_gap(forget_before, forget_after, lb_before, lb_after)
+    forget_delta, lb_drop, selectivity_gap = m.compute_selectivity_gap(forget_before, forget_after, lb_before, lb_after)
     print('-----Evaluation Metrics (BEFORE)-----')
     print(f'Name Log Probability Mean: {forget_before['target_name_logprob_mean']:.3f}')
     print(f'Name Completion Accuracy: {forget_before['name_completion_full']:.3f}')
@@ -34,6 +28,7 @@ def plot_results(forget_before, forget_after, lb_before, lb_after, loss_history,
     fig, axes = plt.subplots(2, 2, figsize=(14, 9))
     fig.suptitle(f'Targeted NPO and Retain on SaulLM-7B-Instruct', fontsize=12)
 
+    # bar graph of unlearning effectiveness metrics
     ax = axes[0,0]
     fk = ['target_name_logprob_mean', 'name_completion_full', 'name_extraction_leakage_full']
     x = np.arange(len(fk)); w = 0.38
@@ -42,6 +37,7 @@ def plot_results(forget_before, forget_after, lb_before, lb_after, loss_history,
     ax.set_xticks(x); ax.set_xticklabels([k.replace('_', '\n') for k in fk], fontsize=8)
     ax.set_title('Unlearning Effectiveness Metrics'); ax.legend()
 
+    # bar graph of legal bench task accuracies
     shared = [t for t in LEGALBENCH_TASKS if t in lb_before and t in lb_after]
     ax = axes[0,1]
     x = np.arange(len(shared)); w = 0.38
@@ -50,11 +46,14 @@ def plot_results(forget_before, forget_after, lb_before, lb_after, loss_history,
     ax.set_xticks(x); ax.set_xticklabels(shared, rotation=40, ha='right', fontsize=8)
     ax.set_ylim(0, 1.05); ax.set_title('LegalBench Balanced Accuracy'); ax.legend()
 
+    # line graph of npo loss during each step of unlearning
     ax = axes[1,0]
     ax.plot(loss_history, color='darkorange', label='total')
     ax.plot(forget_history, color='red', alpha=0.6, label='forget only')
     ax.set_title('Loss'); ax.set_xlabel('step'); ax.legend(); ax.grid(alpha=0.3)
 
+    # line graph of target name log ratio and retain KL to see the difference between
+    # the forget set's unlearning and the model's utility
     ax = axes[1,1]
     ax.plot(ratio_history, color='purple', label='log π_θ − log π_ref (forget)')
     ax.set_xlabel('step'); ax.set_ylabel('log ratio', color='purple')
@@ -74,6 +73,8 @@ def save_results(train_pairs, retain_chunks,
                  forget_after, lb_before, lb_after,
                  mean_a, mean_b, loss_history, forget_history,
                  ratio_history, retain_history):
+    
+    # grabbing all information pertinent to the full project run
     output = {
         "model":   MODEL_NAME,
         "forget_dataset":      f"{DATASET}/{SUBSET}",
@@ -108,6 +109,7 @@ def save_results(train_pairs, retain_chunks,
         },
     }
 
+    # saving results to a designated json file for easy lookup and comparison
     with open(f"{OUTPUT_PREFIX}_results.json", "w") as f:
         json.dump(output, f, indent=2)
     print(f"Saved: {OUTPUT_PREFIX}_results.json")

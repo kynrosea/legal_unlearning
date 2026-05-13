@@ -1,6 +1,6 @@
 # keep all constants in one place
 
-OUTPUT_PREFIX = 'legal_unlearning'
+OUTPUT_PREFIX = '/outputs'
 
 # model and dataset names
 MODEL_NAME = 'Equall/Saul-7B-Instruct-v1'

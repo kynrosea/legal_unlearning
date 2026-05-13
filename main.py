@@ -55,7 +55,7 @@ loss_history, ratio_history, retain_history, forget_history = train.run_npo_with
 forget_metrics_after = m.compute_forget_metrics(model, tokenizer, forget_test)
 lb_accuracy_after = m.run_legalbench_eval(model, tokenizer, LEGALBENCH_TASKS)
 
-forget_delta, lb_delta, selectivity_gap = compute_selectivity_gap(forget_metrics_before, forget_metrics_after, lb_accuracy_before, lb_accuracy_after)
+forget_delta, lb_delta, selectivity_gap = m.compute_selectivity_gap(forget_metrics_before, forget_metrics_after, lb_accuracy_before, lb_accuracy_after)
 
 # printing and plotting evaluation metrics before and after unlearning for comparison
 print_results(forget_metrics_before, forget_metrics_after, lb_accuracy_before, lb_accuracy_after)
