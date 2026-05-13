@@ -17,7 +17,8 @@ def load_tokenizer(model_id):
 
     return tokenizer
 
-# source: TODO
+# loading model in 4-bit precision to reduce memory requirements for loading the model
+# source: https://huggingface.co/blog/4bit-transformers-bitsandbytes
 def load_model(model_id):
     bnb_config = BitsAndBytesConfig(
         load_in_4bit=True,
@@ -57,6 +58,9 @@ def load_NER(ner_model):
 
     return nlp
 
+# attaching lora adapters using peft
+# source: https://huggingface.co/docs/transformers/v4.44.1/en/peft
+#         https://huggingface.co/docs/peft/task_guides/prompt_based_methods
 def attach_lora(model):
     model = prepare_model_for_kbit_training(model)
     lora_config = LoraConfig(
