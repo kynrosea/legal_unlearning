@@ -27,8 +27,8 @@ This project was run in the Google Colab Pro Python 3.12 environment with the A1
 
 ### Execution
 - There are two ways to run this program:
-1. You can run `main.py` directly, using the following command `TODO`. This is preferred if you have the compute support and only want to view the final results.
-2. You can open the `final_project_run.ipynb` and run the program through the Jupyter notebook to see the output of each stage of the process. This can be done in a virtual environment like Google Colab if you do not have the compute support.
+1. You can run `main.py` directly, using the following command `python3 main.py`. This is preferred if you have the compute support and only want to view the final results.
+2. You can open the `final_project_run.ipynb` and run the program through the Jupyter notebook to see the output of each stage of the process. This can be done in a virtual environment like Google Colab if you do not have the compute support. I recommend running the project in the notebook as I have not tested `main.py` as my computer system does not support the memory requirements for running this program.
 
 
 ## AI Use Statement
